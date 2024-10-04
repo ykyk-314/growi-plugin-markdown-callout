@@ -1,57 +1,41 @@
-import React from 'react';
-import './src/Callout.css';
+import { renderCallout } from './src/Callout'; // Calloutのロジックをimport
+import './src/Callout.css'; // 正しいパスでCSSを読み込む
 
-// コールアウトのタグと色の対応
-const calloutColors: { [key: string]: string } = {
-  NOTE: '#478be6',
-  TIP: '#57ab5a',
-  IMPORTANT: '#986ee2',
-  WARNING: '#f18603',
-  CAUTION: '#e5534b',
+declare const growiFacade: {
+  markdownRenderer?: {
+    optionsGenerators: {
+      customGenerateViewOptions: (path: string, options: any, toc: any) => any;
+      generateViewOptions: (path: string, options: any, toc: any) => any;
+    };
+  };
 };
 
-// コールアウトをレンダリングする関数
-export const renderCallout = (
-    OriginalBlockquote: React.FunctionComponent<any>,
-): React.FunctionComponent<any> => {
-  return ({ children, ...props }: any): JSX.Element | null => {
-    // childrenが正しく渡されているかデバッグ
-    console.log('children:', children);
+// プラグインの初期化
+const activate = (): void => {
+  if (!growiFacade || !growiFacade.markdownRenderer) {
+    return;
+  }
 
-    // childrenが存在しない場合を処理
-    if (!children || !children[0]?.props?.children?.[0]) {
-      return <OriginalBlockquote {...props}>{children}</OriginalBlockquote>;
-    }
+  const { optionsGenerators } = growiFacade.markdownRenderer;
 
-    const firstChild = typeof children[0].props.children[0] === 'string'
-      ? children[0].props.children[0].trim()
-      : '';
+  // 既存のビューオプション生成関数をラップする
+  optionsGenerators.customGenerateViewOptions = (...args) => {
+    const options = optionsGenerators.generateViewOptions(...args);
 
-    // firstChildが正しくパースされているかデバッグ
-    console.log('firstChild:', firstChild);
-
-    // [!タグ]の形式にマッチするか確認
-    const match = firstChild.match(/^\[!(\w+)\]/);
-    console.log('match:', match); // マッチしたかどうかの確認
-
-    if (match) {
-      const tag = match[1].toUpperCase(); // タグを大文字に統一
-      const color = calloutColors[tag] || '#ccc'; // マッチしないタグはデフォルト色
-
-      // [!タグ]を削除して内容だけ残す
-      const newChildren = React.cloneElement(children[0], {
-        children: children[0].props.children.slice(1),
-      });
-
-      // カスタムスタイルを適用してレンダリング
-      return (
-        <div className="callout" style={{ backgroundColor: color }}>
-          {newChildren}
-        </div>
-      );
-    }
-
-    // 通常の blockquote をレンダリング
-    return <OriginalBlockquote {...props}>{children}</OriginalBlockquote>;
+    // コールアウトレンダリング関数を追加
+    options.components.blockquote = renderCallout(options.components.blockquote);
+    return options;
   };
+};
+
+// プラグインの終了処理（今回は不要）
+const deactivate = (): void => {};
+
+// プラグインを登録
+if ((window as any).pluginActivators == null) {
+  (window as any).pluginActivators = {};
+}
+(window as any).pluginActivators['growi-plugin-markdown-callout'] = {
+  activate,
+  deactivate,
 };
