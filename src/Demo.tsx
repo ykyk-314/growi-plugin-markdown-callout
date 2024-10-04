@@ -2,16 +2,23 @@ import React from 'react';
 
 import ReactDOM from 'react-dom/client';
 
-import { helloGROWI } from './Hello';
+import { withCopyButton } from './CodeWithCopyButton';
 
-const href = 'https://growi.org/';
+const str = `
+function MersenneTwister(seed) {
+  if (arguments.length == 0) {
+    seed = new Date().getTime();
+  }
 
-const HelloGROWI = helloGROWI(() => <a href={href}>Hello, GROWI</a>);
+  this._mt = new Array(624);
+  this.setSeed(seed);
+}
+`;
+
+const CodeWithCopyButton = withCopyButton(() => <pre><code>{str}</code></pre>);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <HelloGROWI
-      href={href}
-    >Hello, GROWI</HelloGROWI>
+    <CodeWithCopyButton></CodeWithCopyButton>
   </React.StrictMode>,
 );

@@ -2,10 +2,9 @@
   "name": "growi-plugin-markdown-callout",
   "version": "1.0.0",
   "description": "GROWI plugin template for script",
+  "author": "yokoyan",
   "license": "MIT",
   "keywords": [
-    "growi",
-    "growi-plugin"
   ],
   "type": "module",
   "scripts": {

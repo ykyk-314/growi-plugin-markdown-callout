@@ -1,39 +1,43 @@
-import config from './package.json';
-import { helloGROWI } from './src/Hello';
-import { Options, Func, ViewOptions } from './types/utils';
+import { useEffect } from 'react';
 
-declare const growiFacade : {
+import { renderCallout } from './src/Callout';
+import './src/Callout.css';
+
+declare const growiFacade: {
   markdownRenderer?: {
     optionsGenerators: {
-      customGenerateViewOptions: (path: string, options: Options, toc: Func) => ViewOptions,
-      generateViewOptions: (path: string, options: Options, toc: Func) => ViewOptions,
-    },
-  },
+      customGenerateViewOptions: (path: string, options: any, toc: any) => any;
+      generateViewOptions: (path: string, options: any, toc: any) => any;
+    };
+  };
 };
 
+// プラグインの初期化
 const activate = (): void => {
-  if (growiFacade == null || growiFacade.markdownRenderer == null) {
+  if (!growiFacade || !growiFacade.markdownRenderer) {
     return;
   }
 
   const { optionsGenerators } = growiFacade.markdownRenderer;
 
+  // 既存のビューオプション生成関数をラップする
   optionsGenerators.customGenerateViewOptions = (...args) => {
     const options = optionsGenerators.generateViewOptions(...args);
-    const { a } = options.components;
-    options.components.a = helloGROWI(a); // Wrap the default component
+
+    // コールアウトレンダリング関数を追加
+    options.components.blockquote = renderCallout(options.components.blockquote);
     return options;
   };
 };
 
-const deactivate = (): void => {
-};
+// プラグインの終了処理（今回は不要）
+const deactivate = (): void => {};
 
-// register activate
+// プラグインを登録
 if ((window as any).pluginActivators == null) {
   (window as any).pluginActivators = {};
 }
-(window as any).pluginActivators[config.name] = {
+(window as any).pluginActivators['growi-plugin-markdown-callout'] = {
   activate,
   deactivate,
 };
