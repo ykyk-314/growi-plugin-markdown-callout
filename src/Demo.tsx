@@ -2,23 +2,44 @@ import React from 'react';
 
 import ReactDOM from 'react-dom/client';
 
-import { withCopyButton } from './CodeWithCopyButton';
+import { renderCallout } from './Callout';
 
-const str = `
-function MersenneTwister(seed) {
-  if (arguments.length == 0) {
-    seed = new Date().getTime();
-  }
+// サンプルのblockquoteコンポーネント（デフォルトのもの）
+const DefaultBlockquote: React.FunctionComponent<any> = ({ children }) => {
+  return <blockquote>{children}</blockquote>;
+};
 
-  this._mt = new Array(624);
-  this.setSeed(seed);
-}
-`;
+// コールアウト対応のblockquoteを作成
+const CalloutBlockquote = renderCallout(DefaultBlockquote);
 
-const CodeWithCopyButton = withCopyButton(() => <pre><code>{str}</code></pre>);
+// サンプルのコンテンツを用意
+const sampleContent = (
+  <CalloutBlockquote>
+    <p>[!IMPORTANT] これは重要なコールアウトです。</p>
+  </CalloutBlockquote>
+);
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+const Demo = () => {
+  return (
+    <div>
+      <h1>GROWI Plugin: Markdown Callout Demo</h1>
+      {sampleContent}
+      <CalloutBlockquote>
+        <p>[!NOTE] これはノートです。</p>
+      </CalloutBlockquote>
+      <CalloutBlockquote>
+        <p>[!TIP] これはヒントです。</p>
+      </CalloutBlockquote>
+      <CalloutBlockquote>
+        <p>[!WARNING] これは警告です。</p>
+      </CalloutBlockquote>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(
   <React.StrictMode>
-    <CodeWithCopyButton></CodeWithCopyButton>
+    <Demo />
   </React.StrictMode>,
 );
