@@ -1,45 +1,48 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 
-import { renderCallout } from './Callout';
-
-// サンプルのblockquoteコンポーネント（デフォルトのもの）
-const DefaultBlockquote: React.FunctionComponent<any> = ({ children }) => {
-  return <blockquote>{children}</blockquote>;
-};
-
-// コールアウト対応のblockquoteを作成
-const CalloutBlockquote = renderCallout(DefaultBlockquote);
-
-// サンプルのコンテンツを用意
-const sampleContent = (
-  <CalloutBlockquote>
-    <p>[!IMPORTANT] これは重要なコールアウトです。</p>
-  </CalloutBlockquote>
-);
+import Callout from './Callout';
 
 const Demo = () => {
+  useEffect(() => {
+    // ページ内の blockquote 要素を取得
+    const blockquotes = document.querySelectorAll('blockquote');
+
+    blockquotes.forEach((blockquote) => {
+      const paragraph = blockquote.querySelector('p');
+
+      if (paragraph) {
+        const text = paragraph.innerHTML;
+
+        // コールアウトタグのパターンにマッチ
+        const match = text.match(/^\[!(\w+)\](.*)/);
+        if (match) {
+          const type = match[1]; // コールアウトの種類 (CAUTION, NOTE など)
+          const content = match[2].trim(); // コールアウトの内容
+
+          // Callout コンポーネントを作成
+          const calloutElement = React.createElement(Callout, { type, content });
+
+          // 既存の blockquote を Callout コンポーネントで置き換える
+          ReactDOM.render(calloutElement, blockquote);
+        }
+      }
+    });
+  }, []);
+
   return (
     <div>
       <h1>GROWI Plugin: Markdown Callout Demo</h1>
-      {sampleContent}
-      <CalloutBlockquote>
-        <p>[!NOTE] これはノートです。</p>
-      </CalloutBlockquote>
-      <CalloutBlockquote>
-        <p>[!TIP] これはヒントです。</p>
-      </CalloutBlockquote>
-      <CalloutBlockquote>
-        <p>[!WARNING] これは警告です。</p>
-      </CalloutBlockquote>
+      {/* ここで実際のマークダウンによる blockquote が置かれることを想定 */}
+      <blockquote>
+        <p>[!CAUTION] これはコールアウトのテストです</p>
+      </blockquote>
+      <blockquote>
+        <p>[!NOTE] これはノートのテストです</p>
+      </blockquote>
     </div>
   );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(
-  <React.StrictMode>
-    <Demo />
-  </React.StrictMode>,
-);
+export default Demo;
